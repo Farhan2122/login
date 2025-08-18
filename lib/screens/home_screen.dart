@@ -49,11 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
     print("This is homeScreen token: $refreshToken");
     final response = await http.post(
       url,
-      
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: {
+      body: jsonEncode({
          "refresh_token" : refreshToken
-      },
+      }),
       
     );
     print("Full Response: ${response.body}");
