@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:login/constants/colors.dart';
 import 'package:login/screens/home_screen.dart';
 import 'package:login/widgets/custom_textfield.dart';
 import 'package:login/widgets/loginButton.dart';
+
+import '../api/api_services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,68 +18,69 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final api = ApiServices();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   String errorMessage = '';
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  final url = Uri.parse('https://app.wattaudit.com/api-v2/api_login.php');
+  // final url = Uri.parse('https://app.wattaudit.com/api-v2/api_login.php');
 
-  Future<void> postLoginData() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = '';
-    });
-    try {
-      final response = await http.post(
-        url,
-        body: jsonEncode({
-          'username': usernameController.text,
-          'password': passwordController.text,
-          "user_type": "installator",
-          "platform": "android",
-          "device_token": "",
-        }),
-      );
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+  // Future<void> postLoginData() async {
+  //   setState(() {
+  //     isLoading = true;
+  //     errorMessage = '';
+  //   });
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       body: jsonEncode({
+  //         'username': usernameController.text,
+  //         'password': passwordController.text,
+  //         "user_type": "installator",
+  //         "platform": "android",
+  //         "device_token": "",
+  //       }),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = jsonDecode(response.body);
 
-        if (jsonResponse['status'] == 'success') {
-          // Simple success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Login successful!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-          FlutterSecureStorage storage = FlutterSecureStorage();
-          await storage.write(key: 'jwt', value: jsonResponse['jwt']);
-          await storage.write(key: "username", value: jsonResponse['data']['cl_username']);
-          await storage.write(key: 'refreshToken', value: jsonResponse['refresh_token']);
+  //       if (jsonResponse['status'] == 'success') {
+  //         // Simple success message
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text('Login successful!'),
+  //             backgroundColor: Colors.green,
+  //           ),
+  //         );
+  //         Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+  //         FlutterSecureStorage storage = FlutterSecureStorage();
+  //         await storage.write(key: 'jwt', value: jsonResponse['jwt']);
+  //         await storage.write(key: "username", value: jsonResponse['data']['cl_username']);
+  //         await storage.write(key: 'refreshToken', value: jsonResponse['refresh_token']);
         
 
-        } else {
-          setState(() {
-            errorMessage = jsonResponse['message'] ?? 'Login failed';
-          });
-        }
-      } else {
-        setState(() {
-          errorMessage = 'Server error: ${response.statusCode}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'An error occurred: $e';
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  //       } else {
+  //         setState(() {
+  //           errorMessage = jsonResponse['message'] ?? 'Login failed';
+  //         });
+  //       }
+  //     } else {
+  //       setState(() {
+  //         errorMessage = 'Server error: ${response.statusCode}';
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       errorMessage = 'An error occurred: $e';
+  //     });
+  //   } finally {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +150,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   : Loginbutton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          await postLoginData();
+                          setState(() {
+                            isLoading = true;
+                            errorMessage = '';
+                          });
+
+                          final result = await api.postLoginData(
+                            username: usernameController.text,
+                            password: passwordController.text,
+                            context: context, 
+                            );
+                            setState(() {
+                              isLoading = false;
+                            });
+                          if(result['status']) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(result['message']),
+                                backgroundColor: Colors.green,
+                                ),
+                            );
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(builder: (context) => HomeScreen()),);
+                          } else {
+                            setState(() {
+                              errorMessage = result['message'];
+                            });
+                          }
                         }
                       },
                     ),

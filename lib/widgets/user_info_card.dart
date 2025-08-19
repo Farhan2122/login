@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:login/constants/colors.dart';
 
 class UserInfoCard extends StatefulWidget {
-  const UserInfoCard({super.key});
+  const UserInfoCard({super.key, required this.email, required this.name, required this.id, required this.address, required this.ville, required this.postalCode, required this.codeAccess});
+  final String email;
+  final String name;
+  final String id;
+  final String address;
+  final String ville;
+  final String postalCode;
+  final String codeAccess;
 
   @override
   State<UserInfoCard> createState() => _UserInfoCardState();
@@ -38,18 +45,18 @@ class _UserInfoCardState extends State<UserInfoCard> {
               children: [
                 Icon(Icons.folder_shared, color: primaryColor, size: 48),
                 Text(
-                  'tuqeer@codelounge.io',
+                  widget.email,
                   style: TextStyle(color: primaryColor, fontSize: 16),
                 ),
                 VerticalDivider(color: primaryColor, width: 10),
                 Column(
                   children: [
                     Text(
-                      "tuqeer",
+                      widget.name,
                       style: TextStyle(color: primaryColor, fontSize: 16),
                     ),
                     Text(
-                      '466',
+                      widget.id,
                       style: TextStyle(color: primaryColor, fontSize: 16),
                     ),
                   ],
@@ -57,7 +64,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
               ],
             ),
             SizedBox(height: 10),
-            if (isShowContainer) InfoContainer(),
+            if (isShowContainer) InfoContainer(name: widget.name, address: widget.address, ville: widget.ville, postalCode: widget.postalCode, codeAccess: widget.codeAccess,),
           ],
         ),
       ),
@@ -66,7 +73,12 @@ class _UserInfoCardState extends State<UserInfoCard> {
 }
 
 class InfoContainer extends StatelessWidget {
-  const InfoContainer({super.key});
+  const InfoContainer({super.key, required this.name, required this.address, required this.ville, required this.postalCode, required this.codeAccess});
+  final String name;
+  final String address;
+  final String ville;
+  final String postalCode;
+  final String codeAccess;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -90,7 +102,7 @@ class InfoContainer extends StatelessWidget {
                     "Prenom :",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("tuqeer"),
+                  Text(name),
                 ],
               ),
               Row(
@@ -105,7 +117,7 @@ class InfoContainer extends StatelessWidget {
                     "Address :",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("0 gava6 25262 gwhw"),
+                  Text(address),
                 ],
               ),
               Row(
@@ -114,7 +126,7 @@ class InfoContainer extends StatelessWidget {
                     "Ville :",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("CUENCA"),
+                  Text(ville),
                 ],
               ),
               Row(
@@ -123,7 +135,7 @@ class InfoContainer extends StatelessWidget {
                     "Code postal :",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("25262"),
+                  Text(postalCode),
                 ],
               ),
               Row(
@@ -132,7 +144,7 @@ class InfoContainer extends StatelessWidget {
                     "Code Acces :",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("25262"),
+                  Text(codeAccess),
                 ],
               ),
             ],

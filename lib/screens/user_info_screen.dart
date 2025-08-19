@@ -1,14 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:login/api/api_services.dart';
 import 'package:login/constants/colors.dart';
-import 'package:login/dio/dio_interceptors.dart';
+import 'package:login/model/visit_model.dart';
 import 'package:login/widgets/custom_icon_btn.dart';
-import 'package:dio/dio.dart';
 import 'package:login/widgets/user_info_card.dart';
 
 class UserInfoScreen extends StatefulWidget {
@@ -19,36 +15,55 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 class _UserInfoScreenState extends State<UserInfoScreen> {
-  late final Dio dio;
-  final url = "https://app.wattaudit.com/api-v2/res-20/getSpecificUserVisitsList.php";
-  
-  Future<void> _makeSecureApiCall() async {
-    try {
-      
-      final response = await dio.post(
-        url,
-        data: {
-          
-        }
-      );
-      if(response.statusCode == 200) {
-        print("Success: ${response.data}");
-        // Handle successful response
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('API call successful!'), backgroundColor: Colors.green),
-        );
-      } else {
-        print("Error: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('API call failed: ${response.statusCode}'), backgroundColor: Colors.red),
-        );
-      }
-    } catch (e) {
-      print('API call error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('API call error: $e'), backgroundColor: Colors.red),
-      );
-    }
+  FlutterSecureStorage storage = FlutterSecureStorage();
+  late Future<List<VisitModel>> _visitFuture;
+  ApiServices apiServices = ApiServices();
+
+  // Future<List<VisitModel>> _makeSecureApiCall() async {
+  //   final jwt = await storage.read(key: "jwt");
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       body: jsonEncode({
+  //         "jwt": jwt,
+  //         "page_number": 1,
+  //         "start_date": "",
+  //         "cl_name": "",
+  //         "city": "",
+  //         "end_date": "",
+  //         "visit_id": "",
+  //         "bar_type": "se_20",
+  //       }),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+
+  //       if (data['status'] == 'success') {
+  //         if (data['visits_list'] != null) {
+  //           List<dynamic> visitJsonList = data['visits_list'];
+  //         return visitJsonList
+  //             .map((json) => VisitModel.fromJson(json))
+  //             .toList();
+  //         } else {
+  //           return [];
+  //         }
+  //       } else {
+  //         throw Exception("Api returned error status");
+  //       }
+  //     } else {
+  //       throw Exception("Failed with status code: ${response.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Api call erro: $e");
+  //     throw e;
+  //   }
+  // }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _visitFuture = apiServices.makeSecureApiCall();
   }
 
   @override
@@ -61,7 +76,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             pinned: true,
             leading: IconButton(
               onPressed: () {},
-              icon: Icon(CupertinoIcons.bars, color: primaryColor, size: 40,),
+              icon: Icon(CupertinoIcons.bars, color: primaryColor, size: 40),
             ),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
@@ -77,37 +92,71 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text('Liste des RES020', style: TextStyle(color: primaryColor, fontSize: 20),),
-                SizedBox(height: 20,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomIconBtn(text: 'Filtre', icon: Icon(Icons.arrow_downward),),
-                    GestureDetector(
-                      onTap: _makeSecureApiCall,
-                      child: CustomIconBtn(text: 'Rafraichir', icon: Icon(CupertinoIcons.arrow_clockwise),),
-                    )
-                  ],
-                ),
-                SizedBox(height: 15,),
-                ElevatedButton(
-                  onPressed: _makeSecureApiCall,
-                  child: Text('Test Secure API Call'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text(
+                    'Liste des RES020',
+                    style: TextStyle(color: primaryColor, fontSize: 20),
                   ),
-                ),
-                SizedBox(height: 25,),
-                UserInfoCard(),
-              ],
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomIconBtn(
+                        text: 'Filtre',
+                        icon: Icon(Icons.arrow_downward),
+                      ),
+                      GestureDetector(
+                        onTap: apiServices.makeSecureApiCall,
+                        child: CustomIconBtn(
+                          text: 'Rafraichir',
+                          icon: Icon(CupertinoIcons.arrow_clockwise),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 25),
+                  FutureBuilder<List<VisitModel>>(
+                    future: _visitFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(child: Text("No visits found."));
+                      } else {
+                        final visits = snapshot.data!;
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: visits.length,
+                          itemBuilder: (context, index) {
+                            final visit = visits[index];
+                            return Container(
+                              margin: EdgeInsets.symmetric(vertical: 10),
+                              child: UserInfoCard(
+                                email: visit.email,
+                                name: visit.name,
+                                id: visit.id.toString(),
+                                address: visit.address,
+                                ville: visit.ville,
+                                postalCode: visit.postalCode,
+                                codeAccess: visit.postalCode,
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-            ),
-            ),
-          
+          ),
         ],
       ),
     );
