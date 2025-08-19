@@ -19,8 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final apiServices = ApiServices();
   var id;
 
-  final url = Uri.parse('https://app.wattaudit.com/api-v2/validate_token.php');
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

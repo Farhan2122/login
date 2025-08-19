@@ -25,63 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  // final url = Uri.parse('https://app.wattaudit.com/api-v2/api_login.php');
-
-  // Future<void> postLoginData() async {
-  //   setState(() {
-  //     isLoading = true;
-  //     errorMessage = '';
-  //   });
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       body: jsonEncode({
-  //         'username': usernameController.text,
-  //         'password': passwordController.text,
-  //         "user_type": "installator",
-  //         "platform": "android",
-  //         "device_token": "",
-  //       }),
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final jsonResponse = jsonDecode(response.body);
-
-  //       if (jsonResponse['status'] == 'success') {
-  //         // Simple success message
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text('Login successful!'),
-  //             backgroundColor: Colors.green,
-  //           ),
-  //         );
-  //         Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-  //         FlutterSecureStorage storage = FlutterSecureStorage();
-  //         await storage.write(key: 'jwt', value: jsonResponse['jwt']);
-  //         await storage.write(key: "username", value: jsonResponse['data']['cl_username']);
-  //         await storage.write(key: 'refreshToken', value: jsonResponse['refresh_token']);
-        
-
-  //       } else {
-  //         setState(() {
-  //           errorMessage = jsonResponse['message'] ?? 'Login failed';
-  //         });
-  //       }
-  //     } else {
-  //       setState(() {
-  //         errorMessage = 'Server error: ${response.statusCode}';
-  //       });
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       errorMessage = 'An error occurred: $e';
-  //     });
-  //   } finally {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,66 +77,68 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
 
                     SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Forgot your password?         ",
-                    style: TextStyle(color: Color(0xFF456246)),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-
-              isLoading
-                  ? CircularProgressIndicator()
-                  : Loginbutton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            isLoading = true;
-                            errorMessage = '';
-                          });
-
-                          final result = await api.postLoginData(
-                            username: usernameController.text,
-                            password: passwordController.text,
-                            context: context, 
-                            );
-                            setState(() {
-                              isLoading = false;
-                            });
-                          if(result['status']) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(result['message']),
-                                backgroundColor: Colors.green,
-                                ),
-                            );
-                            Navigator.push(
-                              context, 
-                              MaterialPageRoute(builder: (context) => HomeScreen()),);
-                          } else {
-                            setState(() {
-                              errorMessage = result['message'];
-                            });
-                          }
-                        }
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "Forgot your password?         ",
+                          style: TextStyle(color: Color(0xFF456246)),
+                        ),
+                      ],
                     ),
-              if (errorMessage.isNotEmpty)
-                Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text(
-                    errorMessage,
-                    style: TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                    SizedBox(height: 20),
+
+                    isLoading
+                        ? CircularProgressIndicator()
+                        : Loginbutton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                setState(() {
+                                  isLoading = true;
+                                  errorMessage = '';
+                                });
+
+                                final result = await api.postLoginData(
+                                  username: usernameController.text,
+                                  password: passwordController.text,
+                                  context: context,
+                                );
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                if (result['status']) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(result['message']),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => HomeScreen(),
+                                    ),
+                                  );
+                                } else {
+                                  setState(() {
+                                    errorMessage = result['message'];
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                    if (errorMessage.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 16),
+                        child: Text(
+                          errorMessage,
+                          style: TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                   ],
                 ),
               ),
-              
             ],
           ),
         ),

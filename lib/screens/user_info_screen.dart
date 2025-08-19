@@ -19,46 +19,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   late Future<List<VisitModel>> _visitFuture;
   ApiServices apiServices = ApiServices();
 
-  // Future<List<VisitModel>> _makeSecureApiCall() async {
-  //   final jwt = await storage.read(key: "jwt");
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       body: jsonEncode({
-  //         "jwt": jwt,
-  //         "page_number": 1,
-  //         "start_date": "",
-  //         "cl_name": "",
-  //         "city": "",
-  //         "end_date": "",
-  //         "visit_id": "",
-  //         "bar_type": "se_20",
-  //       }),
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-
-  //       if (data['status'] == 'success') {
-  //         if (data['visits_list'] != null) {
-  //           List<dynamic> visitJsonList = data['visits_list'];
-  //         return visitJsonList
-  //             .map((json) => VisitModel.fromJson(json))
-  //             .toList();
-  //         } else {
-  //           return [];
-  //         }
-  //       } else {
-  //         throw Exception("Api returned error status");
-  //       }
-  //     } else {
-  //       throw Exception("Failed with status code: ${response.statusCode}");
-  //     }
-  //   } catch (e) {
-  //     print("Api call erro: $e");
-  //     throw e;
-  //   }
-  // }
-
   @override
   void initState() {
     // TODO: implement initState

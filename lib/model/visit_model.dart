@@ -12,17 +12,17 @@ class VisitModel {
     required this.id,
     required this.address,
     required this.postalCode,
-    required this.ville
+    required this.ville,
   });
 
   factory VisitModel.fromJson(Map<String, dynamic> json) {
     return VisitModel(
-      email: json['email'] ?? 'No Email', 
-      name: json['nombre_titular'] ?? 'No Name', 
-      id: json['id'] ?? 0, 
+      email: json['email'] ?? 'No Email',
+      name: json['nombre_titular'] ?? 'No Name',
+      id: json['id'] ?? 0,
       address: json['localidad'] ?? 'No Address',
       postalCode: json['codigo_postal'] ?? '',
       ville: json['provincia_dom'] ?? '',
-      );
+    );
   }
 }
