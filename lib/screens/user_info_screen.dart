@@ -69,7 +69,9 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                         icon: Icon(Icons.arrow_downward),
                       ),
                       GestureDetector(
-                        onTap: apiServices.makeSecureApiCall,
+                        onTap: () async {
+                          await apiServices.makeSecureApiCall();
+                        },
                         child: CustomIconBtn(
                           text: 'Rafraichir',
                           icon: Icon(CupertinoIcons.arrow_clockwise),
